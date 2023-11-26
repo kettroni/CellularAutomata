@@ -2,36 +2,21 @@ module Gol where
 
 import Prelude
 
+import Board (Board)
 import Data.Array (filter)
 import Data.Foldable (length)
-import Data.Map (Map, lookup, mapMaybeWithKey)
+import Data.Map (lookup, mapMaybeWithKey)
 import Data.Maybe (Maybe(..), fromMaybe)
+import Position (Position(..))
+import Status (Status(..))
 
-type Board = Map Position Status
+nextBoard :: Board -> Board
+nextBoard b = mapMaybeWithKey (\ k _ -> Just $ nextStatus k b) b
 
-newtype Position = Position { x :: Int
-                            , y :: Int
-                            }
-instance positionEq :: Eq Position where
-  eq (Position p1) (Position p2) = p1.x == p2.x && p1.y == p2.y
-derive instance positionOrd :: Ord Position
-instance showPosition :: Show Position where
-  show (Position p) = show p
-
-data Status = Dead | Alive
-derive instance statusEq :: Eq Status
-derive instance statusOrd :: Ord Status
-instance showStatus :: Show Status where
-  show Dead = "Dead"
-  show Alive = "Alive"
-
-updatedBoard :: Board -> Board
-updatedBoard b = mapMaybeWithKey (\ k _ -> Just $ updatedStatus k b) b
-
-updatedStatus :: Position -> Board -> Status
-updatedStatus pos b
-  | aliveNeighboursCount pos b > 3 || aliveNeighboursCount pos b < 2 = Dead
-  | otherwise                                                       = Alive
+nextStatus :: Position -> Board -> Status
+nextStatus pos b
+  | between 2 3 (aliveNeighboursCount pos b) = Alive
+  | otherwise                                = Dead
 
 aliveNeighboursCount :: Position -> Board -> Int
 aliveNeighboursCount point b = length $ filter (\ p -> fromMaybe Dead (lookup p b) == Alive) $ neighboursPositions point
