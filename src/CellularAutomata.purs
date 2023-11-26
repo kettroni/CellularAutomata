@@ -9,22 +9,26 @@ import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tuple (Tuple(..))
 import Position (class Position, generate, neighbours)
 
-defaultEmptyState :: forall p c. Position p => Cell c => Map p c
+-- Cellular Automata (CA)
+class (Position p, Cell c) <= CA p c where
+  nextState :: CA p c => Map p c -> Map p c
+
+defaultEmptyState :: forall p c. CA p c => Map p c
 defaultEmptyState = emptyState generate
 
-emptyState :: forall p c. Position p => Cell c => Array p -> Map p c
+emptyState :: forall p c. CA p c => Array p -> Map p c
 emptyState = specificState mempty
 
-specificState :: forall p c. Position p => Cell c => c -> Array p -> Map p c
+specificState :: forall p c. CA p c => c -> Array p -> Map p c
 specificState cell positions = fromFoldable do
   p <- positions
   pure $ Tuple p cell
 
-nextState :: forall p c. Position p => Cell c => Map p c -> Map p c
-nextState m = mapMaybeWithKey (\ k _ -> Just $ cell (aliveNeighboursCount m k)) m
+defaultNextState :: forall p c. CA p c => Map p c -> Map p c
+defaultNextState m = mapMaybeWithKey (\ k _ -> Just $ cell (aliveNeighboursCount m k)) m
 
-aliveNeighboursCount :: forall p c. Position p => Cell c => Map p c -> p -> Int
+aliveNeighboursCount :: forall p c. CA p c => Map p c -> p -> Int
 aliveNeighboursCount m = length <<< filter (aliveAndFoundFromMap m) <<< neighbours
 
-aliveAndFoundFromMap :: forall p c. Position p => Cell c => Map p c -> p -> Boolean
+aliveAndFoundFromMap :: forall p c. CA p c => Map p c -> p -> Boolean
 aliveAndFoundFromMap m position = mempty /= fromMaybe mempty (lookup position m)

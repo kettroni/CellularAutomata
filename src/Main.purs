@@ -19,6 +19,6 @@ main = do
 
 loop :: Gol2d -> Aff Unit
 loop s = do
-  delay $ Milliseconds 3000.0
+  delay $ Milliseconds 100.0
   liftEffect $ logShow $ nextState s
   loop $ nextState s
