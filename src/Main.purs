@@ -2,14 +2,12 @@ module Main where
 
 import Prelude
 
+import CellularAutomata (nextState)
 import Effect (Effect)
 import Effect.Console (log)
-import Gol (nextBoard)
-import Utils (defaultBoard)
+import Gol (generateDefaultGol2d)
 
 main :: Effect Unit
 main = do
-  log $ show $ defaultBoard
-  log $ show $ next
-    where
-      next = nextBoard defaultBoard
+  log $ show $ generateDefaultGol2d
+  log $ show $ nextState generateDefaultGol2d

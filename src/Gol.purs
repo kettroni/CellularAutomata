@@ -2,35 +2,43 @@ module Gol where
 
 import Prelude
 
-import Board (Board)
-import Data.Array (filter)
-import Data.Foldable (length)
-import Data.Map (lookup, mapMaybeWithKey)
-import Data.Maybe (Maybe(..), fromMaybe)
-import Position (Position(..))
-import Status (Status(..))
+import Cell (class Cell)
+import CellularAutomata (emptyState, specificState)
+import Data.Map (Map, unionWith)
+import Position (Point2d(..), generate2dGrid)
 
-nextBoard :: Board -> Board
-nextBoard b = mapMaybeWithKey (\ k _ -> Just $ nextStatus k b) b
+-- Cell
+data GolCell = Dead | Alive
+derive instance eqGolCell :: Eq GolCell
+derive instance ordGolCell :: Ord GolCell
 
-nextStatus :: Position -> Board -> Status
-nextStatus pos b
-  | between 2 3 (aliveNeighboursCount pos b) = Alive
-  | otherwise                                = Dead
+instance semigroupGolCell :: Semigroup GolCell where
+  append Alive _ = Alive
+  append _ Alive = Alive
+  append _ _     = Dead
 
-aliveNeighboursCount :: Position -> Board -> Int
-aliveNeighboursCount point b = length $ filter (\ p -> fromMaybe Dead (lookup p b) == Alive) $ neighboursPositions point
+instance monoidGolCell :: Monoid GolCell where
+  mempty = Dead
 
-neighboursPositions :: Position -> Array Position
-neighboursPositions (Position p) =
-  [ Position { x: p.x - 1, y: p.y - 1 }
-  , Position { x: p.x,     y: p.y - 1 }
-  , Position { x: p.x + 1, y: p.y - 1 }
+instance showGolCell :: Show GolCell where
+  show Dead  = "Dead"
+  show Alive = "Alive"
 
-  , Position { x: p.x - 1, y: p.y     }
-  , Position { x: p.x + 1, y: p.y     }
+instance cellGolCell :: Cell GolCell where
+  cell aliveNeighbours
+    | between 2 3 aliveNeighbours = Alive
+    | otherwise                   = Dead
 
-  , Position { x: p.x - 1, y: p.y + 1 }
-  , Position { x: p.x,     y: p.y + 1 }
-  , Position { x: p.x + 1, y: p.y + 1 }
+type Gol2d = Map Point2d GolCell
+
+defaultAliveCells :: Gol2d
+defaultAliveCells = specificState Alive
+  [ Point2d { x: 1, y: 1 }
+  , Point2d { x: 1, y: 2 }
   ]
+
+generateGol2d :: Int -> Int -> Gol2d
+generateGol2d width height = unionWith append (emptyState $ generate2dGrid width height) defaultAliveCells
+
+generateDefaultGol2d :: Gol2d
+generateDefaultGol2d = generateGol2d 3 3
