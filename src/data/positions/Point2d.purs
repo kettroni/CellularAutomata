@@ -1,21 +1,25 @@
-module Position where
+module CA.Position.Point2d
+ ( Point2d(..)
+ , generate2dGrid
+ ) where
 
 import Prelude
 
+import CA.Position (class Position)
 import Data.Array ((..))
-
-class Ord a <= Position a where
-  neighbours :: a -> Array a
-  generate :: Array a
 
 newtype Point2d = Point2d { x :: Int
                           , y :: Int
                           }
+
 derive instance ordPoint2d :: Ord Point2d
+
 instance eqPoint2d :: Eq Point2d where
   eq (Point2d p1) (Point2d p2) = p1.x == p2.x && p1.y == p2.y
+
 instance showPosition2d :: Show Point2d where
   show (Point2d p) = show p
+
 instance positionPoint2d :: Position Point2d where
   neighbours :: Point2d -> Array Point2d
   neighbours (Point2d p) =
@@ -30,8 +34,6 @@ instance positionPoint2d :: Position Point2d where
     , Point2d { x: p.x,     y: p.y + 1 }
     , Point2d { x: p.x + 1, y: p.y + 1 }
     ]
-  generate :: Array Point2d
-  generate = generate2dGrid 3 3
 
 generate2dGrid :: Int -> Int -> Array Point2d
 generate2dGrid width height = do

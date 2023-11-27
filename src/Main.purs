@@ -2,13 +2,13 @@ module Main where
 
 import Prelude
 
-import CellularAutomata (nextState)
+import CA (nextState)
+import CA.Gol (Gol2d, generateDefaultGol2d)
 import Data.Time.Duration (Milliseconds(..))
 import Effect (Effect)
 import Effect.Aff (Aff, delay, launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Console (logShow)
-import Gol (Gol2d, generateDefaultGol2d)
 
 main :: Effect Unit
 main = do
